@@ -15,20 +15,15 @@ app.add_middleware(
 
 def parse_query(q: str):
     q_lower = q.lower()
-
-    # Ticket Status
-    import re
     match = re.search(r"ticket (\d+)", q_lower)
     if "status of ticket" in q_lower and match:
+        # Return arguments as a JSON object, not a string
         return {
             "name": "get_ticket_status",
-            "arguments": json.dumps({"ticket_id": int(match.group(1))})
+            "arguments": {"ticket_id": int(match.group(1))}
         }
-    return {"name": "unknown", "arguments": "{}"}
+    return {"name": "unknown", "arguments": {}}
 
 @app.get("/execute")
 def execute(q: str = Query(...)):
-    response = parse_query(q)
-    # Make sure 'arguments' is a JSON object, not a string of Python code
-    response["arguments"] = json.loads(response["arguments"])
-    return response
+    return parse_query(q)
