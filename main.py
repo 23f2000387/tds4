@@ -10,12 +10,12 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_methods=["GET"],
-    allow_headers=["*"],
+    allow_headers=["*"]
 )
 
 @app.get("/execute")
 def execute(q: str = Query(...)):
-    # 1️⃣ Ticket Status
+    # 1. Ticket Status
     m = re.match(r"What is the status of ticket (\d+)\?", q)
     if m:
         return {
@@ -23,7 +23,7 @@ def execute(q: str = Query(...)):
             "arguments": json.dumps({"ticket_id": int(m.group(1))})
         }
 
-    # 2️⃣ Schedule Meeting
+    # 2. Schedule Meeting
     m = re.match(r"Schedule a meeting on (\d{4}-\d{2}-\d{2}) at (\d{2}:\d{2}) in (.+)\.", q)
     if m:
         return {
@@ -35,7 +35,7 @@ def execute(q: str = Query(...)):
             })
         }
 
-    # 3️⃣ Expense Reimbursement
+    # 3. Expense Balance
     m = re.match(r"Show my expense balance for employee (\d+)\.", q)
     if m:
         return {
@@ -43,7 +43,7 @@ def execute(q: str = Query(...)):
             "arguments": json.dumps({"employee_id": int(m.group(1))})
         }
 
-    # 4️⃣ Performance Bonus Calculation
+    # 4. Performance Bonus
     m = re.match(r"Calculate performance bonus for employee (\d+) for (\d+)\.", q)
     if m:
         return {
@@ -54,7 +54,7 @@ def execute(q: str = Query(...)):
             })
         }
 
-    # 5️⃣ Office Issue Reporting
+    # 5. Office Issue Reporting
     m = re.match(r"Report office issue (\d+) for the (.+) department\.", q)
     if m:
         return {
@@ -65,5 +65,5 @@ def execute(q: str = Query(...)):
             })
         }
 
-    # Fallback for unrecognized queries
+    # Fallback
     return {"name": "unknown", "arguments": "{}"}
