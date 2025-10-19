@@ -1,11 +1,12 @@
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 import json
 import re
 
 app = FastAPI()
 
-# Enable CORS for all origins
+# Enable CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -15,10 +16,12 @@ app.add_middleware(
 
 @app.get("/execute")
 def execute(q: str = Query(...)):
+    result = {"name": "unknown", "arguments": "{}"}
+
     # 1. Ticket Status
     m = re.match(r"What is the status of ticket (\d+)\?", q)
     if m:
-        return {
+        result = {
             "name": "get_ticket_status",
             "arguments": json.dumps({"ticket_id": int(m.group(1))})
         }
@@ -26,7 +29,7 @@ def execute(q: str = Query(...)):
     # 2. Schedule Meeting
     m = re.match(r"Schedule a meeting on (\d{4}-\d{2}-\d{2}) at (\d{2}:\d{2}) in (.+)\.", q)
     if m:
-        return {
+        result = {
             "name": "schedule_meeting",
             "arguments": json.dumps({
                 "date": m.group(1),
@@ -38,7 +41,7 @@ def execute(q: str = Query(...)):
     # 3. Expense Balance
     m = re.match(r"Show my expense balance for employee (\d+)\.", q)
     if m:
-        return {
+        result = {
             "name": "get_expense_balance",
             "arguments": json.dumps({"employee_id": int(m.group(1))})
         }
@@ -46,7 +49,7 @@ def execute(q: str = Query(...)):
     # 4. Performance Bonus
     m = re.match(r"Calculate performance bonus for employee (\d+) for (\d+)\.", q)
     if m:
-        return {
+        result = {
             "name": "calculate_performance_bonus",
             "arguments": json.dumps({
                 "employee_id": int(m.group(1)),
@@ -57,7 +60,7 @@ def execute(q: str = Query(...)):
     # 5. Office Issue Reporting
     m = re.match(r"Report office issue (\d+) for the (.+) department\.", q)
     if m:
-        return {
+        result = {
             "name": "report_office_issue",
             "arguments": json.dumps({
                 "issue_code": int(m.group(1)),
@@ -65,5 +68,5 @@ def execute(q: str = Query(...)):
             })
         }
 
-    # Fallback
-    return {"name": "unknown", "arguments": "{}"}
+    # Return raw JSON string
+    return Response(content=json.dumps(result), media_type="application/json")
