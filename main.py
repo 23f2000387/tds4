@@ -68,5 +68,5 @@ def execute(q: str = Query(...)):
             })
         }
 
-    # Return raw JSON string exactly as expected
+    # Return exact JSON string (prevents FastAPI from double-encoding)
     return Response(content=json.dumps(result), media_type="application/json")
