@@ -6,7 +6,7 @@ import re
 
 app = FastAPI()
 
-# Enable CORS
+# Enable CORS for any origin
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -16,9 +16,10 @@ app.add_middleware(
 
 @app.get("/execute")
 def execute(q: str = Query(...)):
+    # Default response
     result = {"name": "unknown", "arguments": "{}"}
 
-    # 1. Ticket Status
+    # Ticket status
     m = re.match(r"What is the status of ticket (\d+)\?", q)
     if m:
         result = {
@@ -26,7 +27,7 @@ def execute(q: str = Query(...)):
             "arguments": json.dumps({"ticket_id": int(m.group(1))})
         }
 
-    # 2. Schedule Meeting
+    # Schedule meeting
     m = re.match(r"Schedule a meeting on (\d{4}-\d{2}-\d{2}) at (\d{2}:\d{2}) in (.+)\.", q)
     if m:
         result = {
@@ -38,7 +39,7 @@ def execute(q: str = Query(...)):
             })
         }
 
-    # 3. Expense Balance
+    # Expense balance
     m = re.match(r"Show my expense balance for employee (\d+)\.", q)
     if m:
         result = {
@@ -46,7 +47,7 @@ def execute(q: str = Query(...)):
             "arguments": json.dumps({"employee_id": int(m.group(1))})
         }
 
-    # 4. Performance Bonus
+    # Performance bonus
     m = re.match(r"Calculate performance bonus for employee (\d+) for (\d+)\.", q)
     if m:
         result = {
@@ -57,7 +58,7 @@ def execute(q: str = Query(...)):
             })
         }
 
-    # 5. Office Issue Reporting
+    # Office issue reporting
     m = re.match(r"Report office issue (\d+) for the (.+) department\.", q)
     if m:
         result = {
@@ -68,5 +69,5 @@ def execute(q: str = Query(...)):
             })
         }
 
-    # Return exact JSON string (prevents FastAPI from double-encoding)
+    # Return exact JSON string to prevent double-encoding
     return Response(content=json.dumps(result), media_type="application/json")
