@@ -6,7 +6,7 @@ import re
 
 app = FastAPI()
 
-# Enable CORS for any origin
+# Enable CORS for GET requests from any origin
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -16,10 +16,9 @@ app.add_middleware(
 
 @app.get("/execute")
 def execute(q: str = Query(...)):
-    # Default response
     result = {"name": "unknown", "arguments": "{}"}
 
-    # Ticket status
+    # 1. Ticket status
     m = re.match(r"What is the status of ticket (\d+)\?", q)
     if m:
         result = {
@@ -27,7 +26,7 @@ def execute(q: str = Query(...)):
             "arguments": json.dumps({"ticket_id": int(m.group(1))})
         }
 
-    # Schedule meeting
+    # 2. Schedule meeting
     m = re.match(r"Schedule a meeting on (\d{4}-\d{2}-\d{2}) at (\d{2}:\d{2}) in (.+)\.", q)
     if m:
         result = {
@@ -39,7 +38,7 @@ def execute(q: str = Query(...)):
             })
         }
 
-    # Expense balance
+    # 3. Expense balance
     m = re.match(r"Show my expense balance for employee (\d+)\.", q)
     if m:
         result = {
@@ -47,7 +46,7 @@ def execute(q: str = Query(...)):
             "arguments": json.dumps({"employee_id": int(m.group(1))})
         }
 
-    # Performance bonus
+    # 4. Performance bonus
     m = re.match(r"Calculate performance bonus for employee (\d+) for (\d+)\.", q)
     if m:
         result = {
@@ -58,7 +57,7 @@ def execute(q: str = Query(...)):
             })
         }
 
-    # Office issue reporting
+    # 5. Office issue reporting
     m = re.match(r"Report office issue (\d+) for the (.+) department\.", q)
     if m:
         result = {
