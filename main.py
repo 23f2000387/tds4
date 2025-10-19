@@ -68,5 +68,5 @@ def execute(q: str = Query(...)):
             })
         }
 
-    # Return raw JSON string
+    # Return raw JSON string exactly as expected
     return Response(content=json.dumps(result), media_type="application/json")
