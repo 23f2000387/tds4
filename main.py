@@ -1,62 +1,36 @@
-# main.py
-from fastapi import FastAPI, Query
-from fastapi.middleware.cors import CORSMiddleware
-import json
 import re
+import json
 
-app = FastAPI()
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET"], allow_headers=["*"])
+def parse_query(q: str) -> dict:
+    q_clean = q.lower().strip()
 
-@app.get("/execute")
-def execute(q: str = Query(...)):
-    # Ticket status
-    m = re.match(r"What is the status of ticket (\d+)\?", q)
-    if m:
-        return {
-            "name": "get_ticket_status",
-            "arguments": json.dumps({"ticket_id": int(m.group(1))})
-        }
+    # Ticket Status
+    ticket_match = re.search(r"ticket (\d+)", q_clean)
+    if "status of ticket" in q_clean and ticket_match:
+        return {"name": "get_ticket_status", "arguments": json.dumps({"ticket_id": int(ticket_match.group(1))})}
 
-    # Schedule meeting
-    m = re.match(r"Schedule a meeting on (\d{4}-\d{2}-\d{2}) at (\d{2}:\d{2}) in (.+)\.", q)
-    if m:
-        return {
-            "name": "schedule_meeting",
-            "arguments": json.dumps({
-                "date": m.group(1),
-                "time": m.group(2),
-                "meeting_room": m.group(3)
-            })
-        }
+    # Meeting Scheduling
+    meeting_match = re.search(r"on (\d{4}-\d{2}-\d{2}) at (\d{2}:\d{2}) in (.+)", q_clean)
+    if "schedule a meeting" in q_clean and meeting_match:
+        date, time, room = meeting_match.groups()
+        return {"name": "schedule_meeting", "arguments": json.dumps({"date": date, "time": time, "meeting_room": room.strip()})}
 
-    # Expense balance
-    m = re.match(r"Show my expense balance for employee (\d+)\.", q)
-    if m:
-        return {
-            "name": "get_expense_balance",
-            "arguments": json.dumps({"employee_id": int(m.group(1))})
-        }
+    # Expense Balance
+    expense_match = re.search(r"employee (\d+)", q_clean)
+    if "expense balance" in q_clean and expense_match:
+        return {"name": "get_expense_balance", "arguments": json.dumps({"employee_id": int(expense_match.group(1))})}
 
-    # Performance bonus
-    m = re.match(r"Calculate performance bonus for employee (\d+) for (\d+)\.", q)
-    if m:
-        return {
-            "name": "calculate_performance_bonus",
-            "arguments": json.dumps({
-                "employee_id": int(m.group(1)),
-                "current_year": int(m.group(2))
-            })
-        }
+    # Performance Bonus
+    bonus_match = re.search(r"employee (\d+) for (\d{4})", q_clean)
+    if "performance bonus" in q_clean and bonus_match:
+        emp_id, year = bonus_match.groups()
+        return {"name": "calculate_performance_bonus", "arguments": json.dumps({"employee_id": int(emp_id), "current_year": int(year)})}
 
-    # Office issue
-    m = re.match(r"Report office issue (\d+) for the (.+) department\.", q)
-    if m:
-        return {
-            "name": "report_office_issue",
-            "arguments": json.dumps({
-                "issue_code": int(m.group(1)),
-                "department": m.group(2)
-            })
-        }
+    # Office Issue
+    issue_match = re.search(r"issue (\d+) for the (.+) department", q_clean)
+    if "report office issue" in q_clean and issue_match:
+        code, dept = issue_match.groups()
+        return {"name": "report_office_issue", "arguments": json.dumps({"issue_code": int(code), "department": dept.strip()})}
 
-    return {"error": "Unrecognized query"}
+    # If no match
+    return {"name": "unknown", "arguments": "{}"}
