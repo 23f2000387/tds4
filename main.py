@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 import re
+import json
 
 app = FastAPI()
 
@@ -17,9 +18,11 @@ def parse_query(q: str):
     # Ticket status
     match = re.search(r"ticket (\d+)", q_lower)
     if "status of ticket" in q_lower and match:
-        return {"name": "get_ticket_status", "arguments": {"ticket_id": int(match.group(1))}}
-    # Add other function mappings here
-    return {"name": "unknown", "arguments": {}}
+        return {
+            "name": "get_ticket_status",
+            "arguments": json.dumps({"ticket_id": int(match.group(1))})
+        }
+    return {"name": "unknown", "arguments": "{}"}
 
 @app.get("/execute")
 def execute(q: str = Query(...)):
